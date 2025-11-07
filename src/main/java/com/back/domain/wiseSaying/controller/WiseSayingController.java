@@ -1,5 +1,6 @@
 package com.back.domain.wiseSaying.controller;
 
+import com.back.Rq;
 import com.back.domain.wiseSaying.entity.WiseSaying;
 import com.back.domain.wiseSaying.service.WiseSayingService;
 

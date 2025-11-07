@@ -8,6 +8,7 @@ import com.back.jdbc.core.JdbcTemplate;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 
 // To do
@@ -198,7 +199,7 @@ public class WiseSayingDao {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        List<WiseSaying> wiseSayings = new java.util.ArrayList<>();
+        List<WiseSaying> wiseSayings = new ArrayList<>();
         try {
             String sql = "SELECT id, content, author FROM wise_sayings WHERE content LIKE ? ORDER BY id DESC";
             conn = new DatabaseConnection().getConnection();
@@ -230,7 +231,7 @@ public class WiseSayingDao {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        List<WiseSaying> wiseSayings = new java.util.ArrayList<>();
+        List<WiseSaying> wiseSayings = new ArrayList<>();
         try {
             String sql = "SELECT id, content, author FROM wise_sayings WHERE author LIKE ? ORDER BY id DESC";
             conn = new DatabaseConnection().getConnection();
@@ -263,7 +264,7 @@ public class WiseSayingDao {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        List<WiseSaying> wiseSayings = new java.util.ArrayList<>();
+        List<WiseSaying> wiseSayings = new ArrayList<>();
         try {
             String sql = "SELECT id, content, author FROM wise_sayings ORDER BY id DESC";
             conn = new DatabaseConnection().getConnection();
