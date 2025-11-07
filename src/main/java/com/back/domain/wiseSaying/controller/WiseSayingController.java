@@ -40,8 +40,6 @@ public class WiseSayingController {
                                 검색타입 : %s
                                 검색어 : %s
                                 ------------------------
-                                번호 / 작가 / 명언
-                                ------------------------
                                 """.formatted(params[1].split("&")[0].split("=")[1],
                                 params[1].split("&")[1].split("=")[1]));
                         String content = params[1].split("&")[1].split("=")[1];
@@ -62,8 +60,6 @@ public class WiseSayingController {
                             ------------------------
                             검색타입 : %s
                             검색어 : %s
-                            ------------------------
-                            번호 / 작가 / 명언
                             ------------------------
                             """.formatted(params[1].split("&")[0].split("=")[1],
                             params[1].split("&")[1].split("=")[1]));
@@ -110,23 +106,29 @@ public class WiseSayingController {
                 String author = scanner.nextLine();
                 wiseSayingService.update(new WiseSaying(id, content, author));
             }
-        } else if (command.startsWith("빌드")) {
-            wiseSayingService.build();
-            System.out.println("data.json 파일의 내용이 갱신되었습니다.");
+        }
+        else if (command.startsWith("빌드")) {
+            System.out.println("빌드 명령어는 더 이상 사용되지 않습니다.");
+//            wiseSayingService.build();
+//            System.out.println("data.json 파일의 내용이 갱신되었습니다.");
         }
     }
 
     public String makePage(int page, List<WiseSaying> wiseSayings) {
         StringBuilder pageContent = new StringBuilder();
+//        if(wiseSayings == null){
+//            return "글이 존재하지 않습니다.";
+//        }
         int totalPages = wiseSayings.size() / 5;
         if (wiseSayings.size() % 5 != 0) {
             totalPages += 1;
         }
         if (page > totalPages) {
             return "존재하지 않는 페이지입니다.";
-        } else if (totalPages <= 0) {
-            return "글이 존재하지 않습니다.";
         }
+//        else if (totalPages <= 0) {
+//            return "글이 존재하지 않습니다.";
+//        }
         //본문
         pageContent.append("번호 / 작가 / 명언\n------------------------\n");
         int startIndex = (page - 1) * 5;

@@ -141,7 +141,8 @@ public class WiseSayingControllerTest {
                 종료
                 """);
 
-        assertThat(updateOut)
-                .contains("data.json 파일의 내용이 갱신되었습니다.");
+//        빌드 명령어는 더 이상 사용되지 않습니다.
+//        assertThat(updateOut)
+//                .contains("data.json 파일의 내용이 갱신되었습니다.");
     }
 }
