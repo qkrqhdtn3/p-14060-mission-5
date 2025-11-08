@@ -110,33 +110,6 @@ public class WiseSayingDao {
         return flag;
     }
 
-//    public boolean existsById(int id){
-//        Connection conn = null;
-//        PreparedStatement pstmt = null;
-//        ResultSet rs = null;
-//        boolean exists = false;
-//        try {
-//            String sql = "SELECT COUNT(*) FROM wise_sayings WHERE id = ?";
-//            conn = new DatabaseConnection().getConnection();
-//            pstmt = conn.prepareStatement(sql);
-//            pstmt.setInt(1, id);
-//            rs = pstmt.executeQuery();
-//            if (rs.next()) {
-//                exists = rs.getInt(1) > 0;
-//            }
-//        } catch (Exception e) {
-//            System.out.println(e);
-//        } finally {
-//            try {
-//                if(rs != null) rs.close();
-//                if(conn != null) conn.close();
-//            } catch (Exception e) {
-//                System.out.println(e);
-//            }
-//        }
-//        return exists;
-//    }
-
     public int getLastId(){
         Connection conn = null;
         PreparedStatement pstmt = null;

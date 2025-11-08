@@ -16,106 +16,82 @@ public class WiseSayingController {
     }
 
     public void handleCommand(String command) {
-        if (command.startsWith("등록")) {
-            System.out.print("명언 : ");
-            String content = scanner.nextLine();
-            System.out.print("작가 : ");
-            String author = scanner.nextLine();
-            WiseSaying wiseSaying = wiseSayingService.add(content, author);
-            System.out.println(wiseSaying.getId() + "번 명언이 등록되었습니다.");
-        } else if (command.startsWith("목록")) {
-            if (command.split("\\?").length == 1) {
-                List<WiseSaying> wiseSayings = wiseSayingService.list();
-                int page = 1;
-                System.out.println(makePage(page, wiseSayings));
-            } else if (command.split("\\?").length > 1) {
-                String[] params = command.split("\\?");
-                if (params[1].startsWith("page=")) {
-                    List<WiseSaying> wiseSayings = wiseSayingService.list();
-                    int page = Integer.parseInt(params[1].split("=")[1]);
-                    System.out.println(makePage(page, wiseSayings));
-                } else if (params[1].startsWith("keywordType=content")) {
-                    if (params[1].split("&")[1].startsWith("keyword=")) {
-                        System.out.print("""
-                                ------------------------
-                                검색타입 : %s
-                                검색어 : %s
-                                ------------------------
-                                """.formatted(params[1].split("&")[0].split("=")[1],
-                                params[1].split("&")[1].split("=")[1]));
-                        String content = params[1].split("&")[1].split("=")[1];
-                        List<WiseSaying> wiseSayings = wiseSayingService.findAllByContent(content);
-                        int page = 1;
-                        if (params[1].split("&").length == 2) {
-                            page = 1;
-                        } else if (params[1].split("&")[2].startsWith("page=")) {
-                            page = Integer.parseInt(params[1].split("&")[2].split("=")[1]);
-                        }
-                        System.out.println(makePage(page, wiseSayings));
-                    } else {
-                        System.out.println("목록?keywordType=content& not keyword= error");
-                        return;
-                    }
-                } else if (params[1].startsWith("keywordType=author")) {
-                    System.out.print("""
-                            ------------------------
-                            검색타입 : %s
-                            검색어 : %s
-                            ------------------------
-                            """.formatted(params[1].split("&")[0].split("=")[1],
-                            params[1].split("&")[1].split("=")[1]));
-                    if (params[1].split("&")[1].startsWith("keyword=")) {
-                        String author = params[1].split("&")[1].split("=")[1];
-                        List<WiseSaying> wiseSayings = wiseSayingService.findAllByAuthor(author);
-                        int page = 1;
-                        if (params[1].split("&").length == 2) {
-                            page = 1;
-                        } else if (params[1].split("&")[2].startsWith("page=")) {
-                            page = Integer.parseInt(params[1].split("&")[2].split("=")[1]);
-                        }
-                        System.out.println(makePage(page, wiseSayings));
-                    } else {
-                        System.out.println("목록?keywordType=author& not keyword= error");
-                        return;
-                    }
-                } else {
-                    System.out.println("목록? error");
-                    return;
-                }
-            }
-        } else if (command.startsWith("삭제")) {
-//            int id = Integer.parseInt(command.substring(6, command.length()));
-            int id = Integer.parseInt(command.split("\\?")[1].split("=")[1]);
-//            System.out.println(command.split("\\?")[1]);
-            if (wiseSayingService.delete(id)) {
-                System.out.println(id + "번 명언이 삭제되었습니다.");
-            } else {
-                System.out.println(id + "번 명언은 존재하지 않습니다.");
-            }
-        } else if (command.startsWith("수정")) {
-//            int id = Integer.parseInt(command.substring(6, command.length()));
-            int id = Integer.parseInt(command.split("\\?")[1].split("=")[1]);
-            WiseSaying wiseSaying = wiseSayingService.findById(id);
-            if (wiseSaying == null) {
-                System.out.println(id + "번 명언은 존재하지 않습니다.");
-            } else {
-                System.out.println("명언(기존) : " + wiseSaying.getContent());
-                System.out.print("명언 : ");
-                String content = scanner.nextLine();
-                System.out.println("작가(기존) : " + wiseSaying.getAuthor());
-                System.out.print("작가 : ");
-                String author = scanner.nextLine();
-                wiseSayingService.update(new WiseSaying(id, content, author));
-            }
-        }
-        else if (command.startsWith("빌드")) {
+        Rq rq = new Rq(command);
+        if (rq.getActionName().equals("등록")) {
+            actionWrite(rq);
+        } else if (rq.getActionName().equals("목록")) {
+            actionList(rq);
+        } else if (rq.getActionName().equals("삭제")) {
+            actionDelete(rq);
+        } else if (rq.getActionName().equals("수정")) {
+            actionUpdate(rq);
+        } else if (rq.getActionName().equals("빌드")) {
             System.out.println("빌드 명령어는 더 이상 사용되지 않습니다.");
-//            wiseSayingService.build();
-//            System.out.println("data.json 파일의 내용이 갱신되었습니다.");
         }
     }
 
-    public String makePage(int page, List<WiseSaying> wiseSayings) {
+    public void actionWrite(Rq rq) {
+        System.out.print("명언 : ");
+        String content = scanner.nextLine();
+        System.out.print("작가 : ");
+        String author = scanner.nextLine();
+        WiseSaying wiseSaying = wiseSayingService.add(content, author);
+        System.out.println("%d번 명언이 등록되었습니다.".formatted(wiseSaying.getId()));
+    }
+
+    public void actionList(Rq rq) {
+//        keywordType이 없는 경우
+        if (rq.getParam("keywordType", "").equals("")) {
+            List<WiseSaying> wiseSayings = wiseSayingService.list();
+//            paramter에 page가 있을 때는 그 값을, 없을 때는 1을 return
+            int page = rq.getParamAsInt("page", 1);
+            System.out.println(makePage(rq, page, wiseSayings));
+        } else if (rq.getParam("keywordType", "").equals("content")) {
+            String content = rq.getParam("keyword", "");
+            List<WiseSaying> wiseSayings = wiseSayingService.findAllByContent(content);
+            int page = rq.getParamAsInt("page", 1);
+            System.out.println(makePage(rq, page, wiseSayings));
+        } else if (rq.getParam("keywordType", "").equals("author")) {
+            String author = rq.getParam("keyword", "");
+            List<WiseSaying> wiseSayings = wiseSayingService.findAllByAuthor(author);
+            int page = rq.getParamAsInt("page", 1);
+            System.out.println(makePage(rq, page, wiseSayings));
+        } else {
+//            keywordType이 parameter에 있는 경우 content, author 둘 중 하나여야 함 1
+            System.out.println("keywordType error 1");
+        }
+    }
+
+    private void actionDelete(Rq rq) {
+        int id = rq.getParamAsInt("id", -1);
+        if (wiseSayingService.delete(id)) {
+            System.out.println("%d번 명언이 삭제되었습니다.".formatted(id));
+        } else {
+            System.out.println("%d번 명언은 존재하지 않습니다.".formatted(id));
+        }
+    }
+
+    private void actionUpdate(Rq rq) {
+        int id = rq.getParamAsInt("id", -1);
+        WiseSaying wiseSaying = wiseSayingService.findById(id);
+        if (wiseSaying == null) {
+            System.out.println("%d번 명언은 존재하지 않습니다.".formatted(id));
+        } else {
+//            텍스트 블록의 후행 공백은 \s로 표시할 수 있습니다.
+            System.out.print("""
+                    명언(기존) : %s
+                    명언 :\s""".formatted(wiseSaying.getContent()));
+            String content = scanner.nextLine();
+            System.out.print("""
+                    작가(기존) : %s
+                    작가 :\s""".formatted(wiseSaying.getAuthor()));
+            String author = scanner.nextLine();
+            wiseSayingService.update(new WiseSaying(id, content, author));
+            System.out.println("%d번 명언이 수정되었습니다.".formatted(id));
+        }
+    }
+
+    public String makePage(Rq rq, int page, List<WiseSaying> wiseSayings) {
         StringBuilder pageContent = new StringBuilder();
 //        if(wiseSayings == null){
 //            return "글이 존재하지 않습니다.";
@@ -131,7 +107,27 @@ public class WiseSayingController {
 //            return "글이 존재하지 않습니다.";
 //        }
         //본문
-        pageContent.append("번호 / 작가 / 명언\n------------------------\n");
+        if (!rq.getParam("keywordType", "").equals("")) {
+            pageContent.append("------------------------\n");
+        }
+        if (rq.getParam("keywordType", "").equals("content")) {
+            pageContent.append("검색타입 : content\n");
+            pageContent.append("검색어 : %s\n".formatted(rq.getParam("keyword", "")));
+        } else if (rq.getParam("keywordType", "").equals("author")) {
+            pageContent.append("검색타입 : author\n");
+            pageContent.append("검색어 : %s\n".formatted(rq.getParam("keyword", "")));
+        } else if (!rq.getParam("keywordType", "").equals("")) {
+//            keywordType이 parameter에 있는 경우 content, author 둘 중 하나여야 함 2
+            System.out.println("keywordType error 2");
+            return "";
+        }
+        if (!rq.getParam("keywordType", "").equals("")) {
+            pageContent.append("------------------------\n");
+        }
+        pageContent.append("""
+                번호 / 작가 / 명언
+                ------------------------
+                """);
         int startIndex = (page - 1) * 5;
         int endIndex = Math.min(startIndex + 5, wiseSayings.size());
         for (int i = startIndex; i < endIndex; i++) {
@@ -149,9 +145,9 @@ public class WiseSayingController {
         pageInfo.append("페이지 : ");
         for (int i = 1; i <= totalPages; i++) {
             if (i == currentPage) {
-                pageInfo.append("[").append(i).append("] ");
+                pageInfo.append("[%d] ".formatted(i));
             } else {
-                pageInfo.append(i).append(" ");
+                pageInfo.append("%d ".formatted(i));
             }
             if (i != totalPages) {
                 pageInfo.append("/ ");
